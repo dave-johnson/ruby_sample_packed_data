@@ -15,11 +15,13 @@ class Header
     @version = data[4].unpack("c")
     @nbr_of_records = data[5..8].unpack('L>*')[0].to_i
   end
-end
 
-# def bin_to_hex(s)
-#   s.each_byte.map { |b| b.to_s(16) }.join
-# end
+  def validate
+    if @code != "MPS7"
+      raise "Header code is invalid"
+    end
+  end
+end
 
 
 class BaseRecord
@@ -61,19 +63,29 @@ class Autopay < BaseRecord
 end
 
 
+def getData(fileName)
+  File.binread(fileName)
+end
+
 
 # ************************* Main routine ********************
 
-data = File.binread("data.dat")
+data = getData("data.dat")
 
-header = Header.new(data)
+begin
+  header = Header.new(data)
+  header.validate
+rescue Exception => e
+  puts e
+  exit
+end
 
 
 
 start = header.bytes
 autopay_started = 0
 autopay_ended = 0
-user_balance = 0
+user_balance = 0.0
 debits = 0.0
 credits = 0.0
 
@@ -99,18 +111,23 @@ for rcdNbr in 0..header.nbr_of_records
     autopay_ended += 1
   else
     puts "******** unknown type"
-    break
+    exit
   end
 
-  # puts rcd.amount if defined? rcd.amount
+
+  # Get the amounts for the selected user id
   if rcd.user_id == 2456938384156277127
-    user_balance += 1
+    if rcd.type == RcdType::DEBIT
+      user_balance += rcd.amount
+    end
+    if rcd.type == RcdType::CREDIT
+      user_balance -= rcd.amount
+    end
   end
 
 end
 
 
-puts "**********************"
 puts "autopay started: #{autopay_started}"
 puts "autopay ended: #{autopay_ended}"
 puts "user balance: #{user_balance}"

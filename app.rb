@@ -75,10 +75,14 @@ end
 
 
 # ************************* Main routine ********************
-
-data = getData("data.dat")
+if ARGV[0]
+  fileName = ARGV[0]
+else
+  fileName = "data.dat"
+end
 
 begin
+  data = getData(fileName)
   header = Header.new(data)
   header.validate
 rescue Exception => e

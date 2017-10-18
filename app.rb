@@ -1,3 +1,5 @@
+
+# Define the various record types
 module RcdType
   DEBIT = "\x00"
   CREDIT = "\x01"
@@ -5,8 +7,10 @@ module RcdType
   END_AUTOPAY = "\x03"
 end
 
+# User_ID that we want to accumulate data
 SELECTED_USER = 2456938384156277127
 
+# Header format for the Header record
 class Header
   attr_reader :bytes, :code, :version, :nbr_of_records
   def initialize(data)
@@ -23,7 +27,7 @@ class Header
   end
 end
 
-
+# BaseRecord format for non-header records
 class BaseRecord
   @@record_size = 13
   # | 1 byte record type enum | 4 byte (uint32) Unix timestamp | 8 byte (uint64) user ID |
@@ -39,6 +43,7 @@ class BaseRecord
 end
 
 
+# DebitCredit format for Debit and Credit records
 class DebitCredit < BaseRecord
   @@bytes = BaseRecord.record_size + 8
   attr_reader :amount
@@ -52,6 +57,7 @@ class DebitCredit < BaseRecord
   end
 end
 
+# Autopay format for Start and End Autopay records
 class Autopay < BaseRecord
   @@bytes = BaseRecord.record_size
   def initialize(data)
@@ -62,6 +68,8 @@ class Autopay < BaseRecord
   end
 end
 
+# currency_format converts the number to currency.
+#  copying code.  forgot to include where i grabbed the code.
 class String
    def currency_format()
       while self.sub!(/(\d+)(\d\d\d)/,'\1,\2'); end
@@ -69,6 +77,7 @@ class String
    end
 end
 
+# getData return the data from the file
 def getData(fileName)
   File.binread(fileName)
 end
@@ -81,6 +90,7 @@ else
   fileName = "data.dat"
 end
 
+# get the data from the file
 begin
   data = getData(fileName)
   header = Header.new(data)
@@ -91,7 +101,7 @@ rescue Exception => e
 end
 
 
-
+# set variables
 start = header.bytes
 autopay_started = 0
 autopay_ended = 0
@@ -100,7 +110,9 @@ debits = 0.0
 credits = 0.0
 
 
+# loop through the file to process all the records
 for rcdNbr in 0..header.nbr_of_records
+
   record_type = data[start]
   case record_type
   when RcdType::DEBIT
@@ -138,6 +150,7 @@ for rcdNbr in 0..header.nbr_of_records
 end
 
 
+# print out the values
 puts "autopay started: #{autopay_started}"
 puts "autopay ended: #{autopay_ended}"
 puts "user #{SELECTED_USER} balance: #{user_balance}"

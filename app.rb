@@ -5,7 +5,7 @@ module RcdType
   END_AUTOPAY = "\x03"
 end
 
-
+SELECTED_USER = 2456938384156277127
 
 class Header
   attr_reader :bytes, :code, :version, :nbr_of_records
@@ -126,7 +126,7 @@ for rcdNbr in 0..header.nbr_of_records
 
 
   # Get the amounts for the selected user id
-  if rcd.user_id == 2456938384156277127
+  if rcd.user_id == SELECTED_USER
     if rcd.type == RcdType::DEBIT
       user_balance += rcd.amount
     end
@@ -140,6 +140,6 @@ end
 
 puts "autopay started: #{autopay_started}"
 puts "autopay ended: #{autopay_ended}"
-puts "user balance: #{user_balance}"
+puts "user #{SELECTED_USER} balance: #{user_balance}"
 puts "debits: #{debits.round(2).to_s.currency_format()}"
 puts "credits: #{credits.round(2).to_s.currency_format()}"

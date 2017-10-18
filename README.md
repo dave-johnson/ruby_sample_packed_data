@@ -10,5 +10,3 @@ This is a list of things that I still would like to do.
 > * Change reading of the file to do block reads to handle large sets of data
 > * Create automate test cases
 > * Pass file name in as a parm
-> * Format the Debit/Credit amounts into whole amounts
-> * Format report output

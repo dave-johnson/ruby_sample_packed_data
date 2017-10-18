@@ -45,7 +45,7 @@ class DebitCredit < BaseRecord
   def initialize(data)
     super(data)
     d = data[@@bytes-8..@@bytes]
-    @amount = d.unpack('G')[0]  # making the assumption it is double float
+    @amount = d.unpack('G')[0].round(2)  # making the assumption it is double float
   end
   def self.bytes
     @@bytes
@@ -62,6 +62,12 @@ class Autopay < BaseRecord
   end
 end
 
+class String
+   def currency_format()
+      while self.sub!(/(\d+)(\d\d\d)/,'\1,\2'); end
+      self
+   end
+end
 
 def getData(fileName)
   File.binread(fileName)
@@ -131,5 +137,5 @@ end
 puts "autopay started: #{autopay_started}"
 puts "autopay ended: #{autopay_ended}"
 puts "user balance: #{user_balance}"
-puts "debits: #{debits}"
-puts "credits: #{credits}"
+puts "debits: #{debits.round(2).to_s.currency_format()}"
+puts "credits: #{credits.round(2).to_s.currency_format()}"
